@@ -2,6 +2,10 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handler = async (event) => {
+    console.log('=== AI FUNCTION DEBUG ===');
+  console.log('API Key exists:', !!process.env.GOOGLE_AI_KEY);
+  console.log('API Key length:', process.env.GOOGLE_AI_KEY?.length);
+  console.log('Received topic:', JSON.parse(event.body)?.topic);
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
