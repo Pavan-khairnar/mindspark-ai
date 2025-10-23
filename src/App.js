@@ -1,4 +1,4 @@
-// src/App.js - COMPLETE WORKING VERSION
+// src/App.js - CLEANED VERSION
 import React, { useState, useEffect } from 'react';
 import { auth } from './firebase';
 import QuizEditor from './components/QuizEditor';
@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } f
 import './App.css';
 import { 
   collection, 
-  //addDoc, 
+  addDoc,
   getDocs, 
   query, 
   where, 
@@ -16,6 +16,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from './firebase';
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +34,6 @@ function Login() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
         setMessage('✅ Account created successfully! You can now login.');
-        // Switch to login after successful signup
         setIsLogin(true);
         setEmail('');
         setPassword('');
@@ -78,9 +78,7 @@ function Login() {
         </div>
       )}
 
-      <h2 style={{ textAlign: 'center', color: '#333' }}>
-        MindSpark AI
-      </h2>
+      <h2 style={{ textAlign: 'center', color: '#333' }}>MindSpark AI</h2>
       
       <form onSubmit={handleSubmit}>
         <input
@@ -152,9 +150,6 @@ function Login() {
   );
 }
 
-// In App.js - REPLACE the Dashboard component with this:
-// In App.js - REPLACE the Dashboard component with this:
-// In App.js - REPLACE the Dashboard component with this:
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [quizzes, setQuizzes] = useState([]);
@@ -169,7 +164,6 @@ function Dashboard() {
     }
   };
 
-  // Load user's quizzes from Firestore
   const loadQuizzes = async () => {
     if (!auth.currentUser) return;
     
@@ -200,7 +194,6 @@ function Dashboard() {
     }
   };
 
-  // Load active session
   const loadActiveSession = async () => {
     if (!auth.currentUser) return;
     
@@ -237,7 +230,6 @@ function Dashboard() {
 
   const startLiveSession = async (quizId, quizTitle) => {
     try {
-      // Generate random 6-digit PIN
       const pin = Math.random().toString(36).substring(2, 8).toUpperCase();
       
       const sessionData = {
@@ -250,16 +242,17 @@ function Dashboard() {
         participants: {},
         currentQuestion: 0,
         scores: {},
-        status: 'waiting' // waiting, active, completed
+        status: 'waiting'
       };
 
+      // FIXED: Using proper variable name
       const sessionDoc = await addDoc(collection(db, 'sessions'), sessionData);
-
-setActiveSession({ 
-  id: sessionDoc.id, 
-  ...sessionData,
-  joinUrl: `${window.location.origin}/join/${pin}`
-});
+      
+      setActiveSession({ 
+        id: sessionDoc.id,
+        ...sessionData,
+        joinUrl: `${window.location.origin}/join/${pin}`
+      });
 
       alert(`🎉 Live session started!\n\n📟 PIN: ${pin}\n\nStudents can join using this PIN at: ${window.location.origin}/join`);
       
@@ -297,7 +290,6 @@ setActiveSession({
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {/* Header */}
       <div style={{ 
         backgroundColor: 'white', 
         padding: '15px 20px', 
@@ -335,7 +327,6 @@ setActiveSession({
         </div>
       </div>
 
-      {/* Navigation Tabs */}
       <div style={{ 
         backgroundColor: 'white', 
         padding: '0 20px',
@@ -387,7 +378,6 @@ setActiveSession({
         </button>
       </div>
 
-      {/* Active Session Banner */}
       {activeSession && (
         <div style={{ 
           backgroundColor: '#d4edda', 
@@ -421,7 +411,6 @@ setActiveSession({
         </div>
       )}
 
-      {/* Tab Content */}
       <div style={{ padding: '20px' }}>
         {activeTab === 'dashboard' && (
           <div style={{ 
@@ -484,7 +473,6 @@ setActiveSession({
             maxWidth: '1000px', 
             margin: '0 auto'
           }}>
-            {/* Active Session Card */}
             {activeSession && (
               <div style={{ 
                 padding: '20px',
@@ -530,7 +518,6 @@ setActiveSession({
               </div>
             )}
 
-            {/* Quizzes List */}
             <div style={{ 
               padding: '20px',
               backgroundColor: 'white',
