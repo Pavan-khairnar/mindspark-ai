@@ -1,10 +1,9 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Store question history
 let questionHistory = new Map();
 
 exports.handler = async (event) => {
-  console.log('🚀 Function called with AI creativity mode');
+  console.log('🚀 Function called with PATTERN BREAKER mode');
   
   const apiKey = process.env.GOOGLE_AI_KEY;
   
@@ -13,7 +12,7 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        data: getCreativeFallback("general")
+        data: getPatternBreakerFallback("general")
       })
     };
   }
@@ -25,58 +24,73 @@ exports.handler = async (event) => {
     const cleanTopic = cleanTopicInput(topic);
     console.log(`🧹 Cleaned: "${cleanTopic}"`);
     
-    // Get previous questions to avoid repetition
     const previousQuestions = questionHistory.get(cleanTopic) || [];
     
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
-      You are an expert quiz master and educator. Create a COMPLETELY UNIQUE and ENGAGING multiple choice question about "${cleanTopic}".
-
-      BE CREATIVE AND ORIGINAL!
+      CRITICAL: YOU MUST ABSOLUTELY AVOID THIS TERRIBLE QUESTION PATTERN:
+      "What is the fundamental process involved in [topic]?"
+      Options: ["The core mechanism of [topic]", "Historical development of [topic]", "Practical applications of [topic]", "Theoretical framework of [topic]"]
       
-      IMPORTANT GUIDELINES:
-      - Create a question that hasn't been asked before
-      - Make it thought-provoking and educational
-      - Ensure exactly 4 distinct options
-      - Place the correct answer in a RANDOM position (0-3)
-      - Make wrong options plausible but clearly incorrect
-      - Provide an insightful explanation
-
-      DO NOT USE THESE OVERUSED QUESTION PATTERNS:
-      - "What is the fundamental process of X?"
-      - "What is the main purpose of X?"
-      - "Which describes the core concept of X?"
-      - Any generic "what is" questions
-
-      INSTEAD, CREATE QUESTIONS LIKE:
-      - Real-world scenarios and applications
-      - Comparative analysis between concepts
-      - Problem-solving situations
-      - "What would happen if..." scenarios
-      - Historical context or evolution
-      - Common misconceptions debunking
-      - Performance trade-off analysis
-      - Future implications or trends
-
-      ${previousQuestions.length > 0 ? `
-      RECENT QUESTIONS TO AVOID REPEATING:
-      ${previousQuestions.slice(-5).join('\n')}
-      ` : ''}
-
-      Return your response as a JSON object with this structure:
+      THIS PATTERN IS BANNED! DO NOT USE IT EVER!
+      
+      CREATE A COMPLETELY DIFFERENT QUESTION ABOUT "${cleanTopic}" THAT:
+      - Is specific and concrete, NOT abstract or generic
+      - Tests practical knowledge or application
+      - Has options that are REAL, SPECIFIC answers, not meta-descriptions
+      - Cannot be answered by simply rephrasing the topic
+      
+      BANNED PHRASES:
+      - "fundamental process"
+      - "core mechanism" 
+      - "historical development"
+      - "practical applications"
+      - "theoretical framework"
+      - "main purpose"
+      - "primary goal"
+      - "basic concept"
+      
+      REQUIRED QUESTION CHARACTERISTICS:
+      ✅ Must include SPECIFIC examples or scenarios
+      ✅ Must test APPLIED knowledge, not definitions
+      ✅ Options must be SUBSTANTIVE answers, not categories
+      ✅ Question should make someone think, not recall
+      
+      EXAMPLE FOR "Astronomy":
+      ❌ BAD: "What is the fundamental process involved in astronomy?"
+      ✅ GOOD: "Which celestial phenomenon occurs when a massive star collapses under its own gravity, creating an object so dense that not even light can escape?"
+      Options: ["Black hole formation", "Supernova explosion", "Planetary nebula creation", "White dwarf cooling"]
+      
+      EXAMPLE FOR "Human Evolution":
+      ❌ BAD: "What is the core mechanism of human evolution?"
+      ✅ GOOD: "Which genetic discovery in the 21st century provided crucial evidence about interbreeding between Homo sapiens and Neanderthals?"
+      Options: ["DNA analysis of fossil remains", "Carbon dating of tools", "Comparative anatomy studies", "Language development patterns"]
+      
+      EXAMPLE FOR "Indian Songs":
+      ❌ BAD: "What is the theoretical framework of Indian songs?"
+      ✅ GOOD: "In Indian classical music, which rhythmic cycle consisting of 16 beats is commonly used in compositions and improvisations?"
+      Options: ["Teental", "Raga Yaman", "Harmonium accompaniment", "Bollywood playback"]
+      
+      CREATE YOUR QUESTION:
+      - Make it about SPECIFIC knowledge of "${cleanTopic}"
+      - Include concrete details, names, events, or techniques
+      - Ensure options are factual answers, not abstract categories
+      - Place correct answer randomly (0-3)
+      
+      Return JSON:
       {
-        "question": "Your creative question here?",
-        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "question": "Your specific, non-generic question?",
+        "options": ["Specific answer A", "Specific answer B", "Specific answer C", "Specific answer D"],
         "correctAnswer": 0,
-        "explanation": "Clear explanation that teaches something valuable"
+        "explanation": "Why the correct answer is right"
       }
-
-      Now create the most interesting and unique question you can think of about "${cleanTopic}"!
+      
+      NOW CREATE A QUESTION THAT BREAKS THE TERRIBLE PATTERN COMPLETELY!
     `;
 
-    console.log('🎨 Calling AI with creative freedom...');
+    console.log('💥 Calling AI with pattern breaker...');
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -86,23 +100,30 @@ exports.handler = async (event) => {
     try {
       let questionData = JSON.parse(text.trim());
       
-      // Validate the basic structure
-      if (!questionData.question || !questionData.options || questionData.options.length !== 4) {
-        throw new Error('Invalid question structure from AI');
+      // PATTERN DETECTION AND REJECTION
+      const badPatternDetected = detectBadPattern(questionData, cleanTopic);
+      if (badPatternDetected) {
+        console.log('🚨 BAD PATTERN DETECTED! Using emergency fallback');
+        throw new Error('AI used banned pattern');
       }
       
-      // Ensure correctAnswer is valid
+      // Validate structure
+      if (!questionData.question || !questionData.options || questionData.options.length !== 4) {
+        throw new Error('Invalid structure');
+      }
+      
+      // Ensure valid correctAnswer
       if (questionData.correctAnswer < 0 || questionData.correctAnswer > 3) {
         questionData.correctAnswer = Math.floor(Math.random() * 4);
       }
       
       console.log(`🎯 Question: ${questionData.question}`);
-      console.log(`📊 Correct answer at index: ${questionData.correctAnswer}`);
+      console.log(`📊 Options: ${questionData.options.join(' | ')}`);
       
-      // Store to avoid repetition
+      // Store history
       const history = questionHistory.get(cleanTopic) || [];
       history.push(questionData.question);
-      if (history.length > 15) history.shift();
+      if (history.length > 10) history.shift();
       questionHistory.set(cleanTopic, history);
       
       return {
@@ -110,16 +131,13 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           success: true,
           data: questionData,
-          creativity: {
-            historySize: history.length,
-            topic: cleanTopic
-          }
+          patternCheck: "passed"
         })
       };
       
     } catch (parseError) {
-      console.error('❌ AI returned invalid JSON, using creative fallback');
-      const fallback = getCreativeFallback(cleanTopic, previousQuestions);
+      console.error('❌ Pattern violation or parse error, using emergency fallback');
+      const fallback = getPatternBreakerFallback(cleanTopic, previousQuestions);
       
       const history = questionHistory.get(cleanTopic) || [];
       history.push(fallback.question);
@@ -130,7 +148,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           success: true,
           data: fallback,
-          note: "AI creativity needed some help"
+          note: "Emergency fallback due to pattern violation"
         })
       };
     }
@@ -141,20 +159,65 @@ exports.handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        data: getCreativeFallback("error recovery", [])
+        data: getPatternBreakerFallback("error", [])
       })
     };
   }
 };
 
+// Detect and reject the bad pattern
+function detectBadPattern(questionData, topic) {
+  const question = questionData.question.toLowerCase();
+  const options = questionData.options.map(opt => opt.toLowerCase());
+  
+  // Check for banned phrases in question
+  const bannedPhrases = [
+    "fundamental process", "core mechanism", "historical development",
+    "practical applications", "theoretical framework", "main purpose",
+    "primary goal", "basic concept", "what is the", "what are the"
+  ];
+  
+  for (const phrase of bannedPhrases) {
+    if (question.includes(phrase)) {
+      console.log(`🚨 Banned phrase detected: ${phrase}`);
+      return true;
+    }
+  }
+  
+  // Check for meta-option patterns
+  const metaPatterns = options.some(opt => 
+    opt.includes("core mechanism") || 
+    opt.includes("historical development") ||
+    opt.includes("practical applications") ||
+    opt.includes("theoretical framework") ||
+    opt.includes("of " + topic.toLowerCase())
+  );
+  
+  if (metaPatterns) {
+    console.log('🚨 Meta-option pattern detected');
+    return true;
+  }
+  
+  // Check if options are too generic
+  const allOptionsGeneric = options.every(opt => 
+    opt.length < 20 || // Too short
+    opt.split(' ').length < 4 // Too few words
+  );
+  
+  if (allOptionsGeneric) {
+    console.log('🚨 Options too generic');
+    return true;
+  }
+  
+  return false;
+}
+
 // Topic cleaning
 function cleanTopicInput(topic) {
-  if (!topic) return "Computer Science";
+  if (!topic) return "General Knowledge";
   
   const lowerTopic = topic.toLowerCase().trim();
-  
-  // Remove question phrases
-  const questionPhrases = ["what is", "what are", "explain", "define", "describe", "tell me about"];
+  const questionPhrases = ["what is", "what are", "explain", "define", "describe"];
   let cleaned = lowerTopic;
   questionPhrases.forEach(phrase => {
     if (cleaned.startsWith(phrase)) {
@@ -162,15 +225,10 @@ function cleanTopicInput(topic) {
     }
   });
   
-  // Expand acronyms
   const acronyms = {
     "dsa": "Data Structures and Algorithms",
     "ai": "Artificial Intelligence", 
-    "ml": "Machine Learning",
-    "oop": "Object Oriented Programming",
-    "dbms": "Database Management Systems",
-    "os": "Operating Systems",
-    "cn": "Computer Networks"
+    "ml": "Machine Learning"
   };
   
   return acronyms[cleaned] || 
@@ -179,73 +237,74 @@ function cleanTopicInput(topic) {
       .join(' ');
 }
 
-// Creative fallback questions that are actually diverse
-function getCreativeFallback(topic, previousQuestions) {
-  const creativeQuestions = [
-    {
-      question: `If ${topic} principles were applied to urban traffic management, which approach would most likely reduce congestion?`,
+// Emergency fallbacks that actually break the pattern
+function getPatternBreakerFallback(topic, previousQuestions) {
+  const emergencyQuestions = {
+    "Astronomy": {
+      question: "Which spacecraft provided the first detailed images of Pluto's surface in 2015, revealing heart-shaped glaciers and mountains?",
       options: [
-        "Implementing priority queues for emergency vehicles",
-        "Using stacks to manage intersection flow",
-        "Applying graph theory to optimize route planning",
-        "Creating binary trees for traffic light timing"
-      ],
-      correctAnswer: 2,
-      explanation: `Graph theory excels at route optimization problems, making it ideal for traffic management where multiple paths and connections need to be considered.`
-    },
-    {
-      question: `A startup is building a social media app and needs to store user connections efficiently. Which ${topic} concept would be most appropriate?`,
-      options: [
-        "Hash tables for O(1) user lookup",
-        "Graph structures to represent follower relationships", 
-        "Arrays for sequential post storage",
-        "Stacks for managing user sessions"
-      ],
-      correctAnswer: 1,
-      explanation: `Graph structures naturally represent network relationships like followers and friends, allowing efficient traversal and connection analysis.`
-    },
-    {
-      question: `In the evolution of ${topic}, which breakthrough most significantly changed how developers approach problem-solving?`,
-      options: [
-        "The shift from procedural to object-oriented paradigms",
-        "Introduction of dynamic programming techniques",
-        "Development of efficient sorting algorithms", 
-        "Creation of database indexing methods"
-      ],
-      correctAnswer: 1,
-      explanation: `Dynamic programming revolutionized problem-solving by enabling efficient solutions to complex problems through optimal substructure and memoization.`
-    },
-    {
-      question: `When designing a recommendation system for an e-commerce platform, which ${topic} approach would provide the most personalized suggestions?`,
-      options: [
-        "Collaborative filtering using matrix operations",
-        "Content-based filtering with keyword matching",
-        "Popularity-based trending items",
-        "Random selection from user's purchase history"
+        "New Horizons",
+        "Voyager 1", 
+        "Hubble Space Telescope",
+        "Cassini-Huygens"
       ],
       correctAnswer: 0,
-      explanation: `Collaborative filtering analyzes user behavior patterns and similarities to provide highly personalized recommendations based on what similar users liked.`
+      explanation: "NASA's New Horizons spacecraft conducted a flyby of Pluto in July 2015, capturing unprecedented images of its surface features."
     },
-    {
-      question: `Which ${topic} misconception often leads to performance issues in large-scale applications?`,
+    "Human Evolution": {
+      question: "The discovery of which hominin species in Siberia's Denisova Cave revealed interbreeding with both Neanderthals and modern humans?",
       options: [
-        "Assuming all operations have constant time complexity",
-        "Using the most recently learned data structure for every problem",
-        "Prioritizing code readability over all performance considerations", 
-        "Ignoring memory allocation patterns in recursive functions"
+        "Denisovans",
+        "Homo erectus", 
+        "Australopithecus afarensis",
+        "Homo habilis"
+      ],
+      correctAnswer: 0,
+      explanation: "Denisovans, identified through DNA analysis in 2010, interbred with both Neanderthals and Homo sapiens, leaving genetic traces in modern human populations."
+    },
+    "Indian Songs": {
+      question: "Which legendary Indian composer created the raga-based background score for the 1955 film 'Pyaasa' that revolutionized Bollywood music?",
+      options: [
+        "S.D. Burman",
+        "R.D. Burman", 
+        "Naushad Ali",
+        "A.R. Rahman"
+      ],
+      correctAnswer: 0,
+      explanation: "S.D. Burman's innovative use of classical ragas in 'Pyaasa' created a new standard for film music composition in Indian cinema."
+    },
+    "Data Structures and Algorithms": {
+      question: "In distributed systems, which consensus algorithm allows multiple servers to agree on data values despite network failures?",
+      options: [
+        "Raft Protocol",
+        "QuickSort algorithm", 
+        "Dijkstra's algorithm",
+        "Binary search trees"
+      ],
+      correctAnswer: 0,
+      explanation: "The Raft consensus algorithm enables distributed systems to maintain consistency and agree on operations even when some servers fail or networks partition."
+    }
+  };
+  
+  // Try to get topic-specific question
+  if (emergencyQuestions[topic]) {
+    return emergencyQuestions[topic];
+  }
+  
+  // Generic emergency question
+  const genericQuestions = [
+    {
+      question: `What recent breakthrough in ${topic} has significantly changed our understanding or capabilities in this field?`,
+      options: [
+        "CRISPR gene editing technology development",
+        "Deep learning neural network advancements", 
+        "Quantum computing experimental verification",
+        "Mars rover geological discoveries"
       ],
       correctAnswer: 1,
-      explanation: `Applying data structures without considering their specific strengths and weaknesses for the problem domain often leads to suboptimal performance at scale.`
+      explanation: `Recent advances in ${topic} continue to push the boundaries of what's possible in scientific and technological innovation.`
     }
   ];
   
-  // Filter out recently used questions
-  const usedQuestions = new Set(previousQuestions);
-  const available = creativeQuestions.filter(q => !usedQuestions.has(q.question));
-  
-  const selected = available.length > 0 
-    ? available[Math.floor(Math.random() * available.length)]
-    : creativeQuestions[Math.floor(Math.random() * creativeQuestions.length)];
-  
-  return selected;
+  return genericQuestions[0];
 }
