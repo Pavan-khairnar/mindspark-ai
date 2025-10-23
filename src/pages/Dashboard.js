@@ -10,7 +10,6 @@ import {
   updateDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 import { db, auth } from '../utils/firebase';
 import Header from '../components/common/Header';
 import QuizEditor from '../components/quiz/QuizEditor';
@@ -106,10 +105,9 @@ const Dashboard = ({ user, onLogout }) => {
         status: 'waiting'
       };
 
-      const sessionDoc = await addDoc(collection(db, 'sessions'), sessionData);
+      await addDoc(collection(db, 'sessions'), sessionData);
       
       setActiveSession({ 
-        id: sessionDoc.id,
         ...sessionData
       });
 

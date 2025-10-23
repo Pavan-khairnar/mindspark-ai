@@ -59,7 +59,8 @@ const QuizEditor = ({ onQuizCreated }) => {
         updatedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'quizzes'), quizData);
+      // Remove the unused variable assignment
+      await addDoc(collection(db, 'quizzes'), quizData);
       
       alert(`✅ Quiz "${title}" created successfully with ${questions.length} questions!`);
       setTitle('');
