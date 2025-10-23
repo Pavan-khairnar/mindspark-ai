@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } f
 import './App.css';
 import { 
   collection, 
-  addDoc, 
+  //addDoc, 
   getDocs, 
   query, 
   where, 
@@ -253,13 +253,13 @@ function Dashboard() {
         status: 'waiting' // waiting, active, completed
       };
 
-      await addDoc(collection(db, 'sessions'), sessionData);
-      
-      setActiveSession({ 
-        id: docRef.id, 
-        ...sessionData,
-        joinUrl: `${window.location.origin}/join/${pin}`
-      });
+      const sessionDoc = await addDoc(collection(db, 'sessions'), sessionData);
+
+setActiveSession({ 
+  id: sessionDoc.id, 
+  ...sessionData,
+  joinUrl: `${window.location.origin}/join/${pin}`
+});
 
       alert(`🎉 Live session started!\n\n📟 PIN: ${pin}\n\nStudents can join using this PIN at: ${window.location.origin}/join`);
       
