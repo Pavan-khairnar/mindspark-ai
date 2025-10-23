@@ -1,0 +1,168 @@
+.gradient-btn {
+  position: relative;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  font-family: inherit;
+  outline: none;
+}
+
+/* Variants */
+.gradient-btn--primary {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.gradient-btn--secondary {
+  background: var(--secondary-gradient);
+  color: white;
+}
+
+.gradient-btn--accent {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.gradient-btn--success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.gradient-btn--warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+/* Sizes */
+.gradient-btn--small {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 8px;
+}
+
+.gradient-btn--medium {
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+.gradient-btn--large {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+  border-radius: 16px;
+}
+
+/* Hover effects */
+.gradient-btn:not(.gradient-btn--disabled):not(.gradient-btn--loading):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+}
+
+.gradient-btn--primary:hover {
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+}
+
+.gradient-btn--secondary:hover {
+  box-shadow: 0 12px 40px rgba(240, 147, 251, 0.4);
+}
+
+.gradient-btn--accent:hover {
+  box-shadow: 0 12px 40px rgba(79, 172, 254, 0.4);
+}
+
+.gradient-btn--success:hover {
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+}
+
+/* Overlay for shine effect */
+.gradient-btn-overlay {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.gradient-btn:not(.gradient-btn--disabled):not(.gradient-btn--loading):hover .gradient-btn-overlay {
+  left: 100%;
+}
+
+/* Loading state */
+.gradient-btn--loading {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.gradient-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Disabled state */
+.gradient-btn--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.gradient-btn--disabled .gradient-btn-overlay {
+  display: none;
+}
+
+/* Icon */
+.gradient-btn-icon {
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+}
+
+.gradient-btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Focus state for accessibility */
+.gradient-btn:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Active state */
+.gradient-btn:active:not(.gradient-btn--disabled):not(.gradient-btn--loading) {
+  transform: translateY(0);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .gradient-btn--large {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+  
+  .gradient-btn {
+    min-height: 44px; /* Better touch targets */
+  }
+}
