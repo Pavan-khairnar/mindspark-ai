@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/common/Header';
-import QuizEditor from '../components/quiz/QuizEditor';
-import LiveSessionPanel from '../components/quiz/LiveSessionPanel';
-import DashboardCard from '../components/ui/DashboardCard';
-import AnimatedBackground from '../components/ui/AnimatedBackground';
-import GlassCard from '../components/ui/GlassCard';
-import GradientButton from '../components/ui/GradientButton';
 import { 
   collection, 
   getDocs, 
   query, 
-  where 
+  where,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp 
 } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { db, auth } from '../utils/firebase';
+import Header from '../components/common/Header';
+import QuizEditor from '../components/quiz/QuizEditor';
+import AnimatedBackground from '../components/ui/AnimatedBackground';
+import GlassCard from '../components/ui/GlassCard';
+import GradientButton from '../components/ui/GradientButton';
+import DashboardCard from '../components/ui/DashboardCard';
 import './Dashboard.css';
 
 const Dashboard = ({ user, onLogout }) => {
@@ -84,8 +89,62 @@ const Dashboard = ({ user, onLogout }) => {
     loadQuizzes();
   };
 
-  const handleSessionUpdate = (session) => {
-    setActiveSession(session);
+  const startLiveSession = async (quizId, quizTitle) => {
+    try {
+      const pin = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      const sessionData = {
+        quizId: quizId,
+        quizTitle: quizTitle,
+        pin: pin,
+        isLive: true,
+        createdBy: auth.currentUser.uid,
+        createdAt: serverTimestamp(),
+        participants: {},
+        currentQuestion: 0,
+        scores: {},
+        status: 'waiting'
+      };
+
+      const sessionDoc = await addDoc(collection(db, 'sessions'), sessionData);
+      
+      setActiveSession({ 
+        id: sessionDoc.id,
+        ...sessionData
+      });
+
+      alert(`🎉 Live session started!\n\n📟 PIN: ${pin}\n\nStudents can join using this PIN!`);
+      
+    } catch (error) {
+      alert('Error starting live session: ' + error.message);
+    }
+  };
+
+  const endLiveSession = async (sessionId) => {
+    if (window.confirm('Are you sure you want to end this live session?')) {
+      try {
+        await updateDoc(doc(db, 'sessions', sessionId), {
+          isLive: false,
+          endedAt: serverTimestamp()
+        });
+        setActiveSession(null);
+        alert('Live session ended!');
+      } catch (error) {
+        alert('Error ending session: ' + error.message);
+      }
+    }
+  };
+
+  const deleteQuiz = async (quizId, quizTitle) => {
+    if (window.confirm(`Are you sure you want to delete "${quizTitle}"?`)) {
+      try {
+        await deleteDoc(doc(db, 'quizzes', quizId));
+        loadQuizzes();
+        alert('Quiz deleted successfully!');
+      } catch (error) {
+        alert('Error deleting quiz: ' + error.message);
+      }
+    }
   };
 
   const QuizCard = ({ quiz }) => (
@@ -107,7 +166,7 @@ const Dashboard = ({ user, onLogout }) => {
           variant="success"
           size="small"
           disabled={!!activeSession}
-          onClick={() => {/* Add start session logic */}}
+          onClick={() => startLiveSession(quiz.id, quiz.title)}
         >
           {activeSession ? '🎯 Session Active' : '🎯 Start Live'}
         </GradientButton>
@@ -123,7 +182,7 @@ const Dashboard = ({ user, onLogout }) => {
         <GradientButton
           variant="error"
           size="small"
-          onClick={() => {/* Add delete logic */}}
+          onClick={() => deleteQuiz(quiz.id, quiz.title)}
         >
           🗑️ Delete
         </GradientButton>
@@ -167,10 +226,21 @@ const Dashboard = ({ user, onLogout }) => {
 
       <main className="dashboard-main">
         {activeSession && (
-          <LiveSessionPanel 
-            session={activeSession} 
-            onSessionEnd={handleSessionUpdate}
-          />
+          <GlassCard className="live-session-banner" padding="medium" glow={true}>
+            <div className="session-info">
+              <h3>🎯 Live Session Active</h3>
+              <div className="session-details">
+                <strong>PIN:</strong> {activeSession.pin} • 
+                <strong> Quiz:</strong> {activeSession.quizTitle}
+              </div>
+            </div>
+            <GradientButton
+              variant="error"
+              onClick={() => endLiveSession(activeSession.id)}
+            >
+              ❌ End Session
+            </GradientButton>
+          </GlassCard>
         )}
 
         <div className="dashboard-content">
