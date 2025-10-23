@@ -1,17 +1,21 @@
-// functions/generate-question.js - REAL AI VERSION
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.handler = async (event) => {
-    console.log('=== AI FUNCTION DEBUG ===');
+  console.log('=== 🚨 AI FUNCTION DEBUG START ===');
+  
+  // Debug: Check if API key is loading
   console.log('API Key exists:', !!process.env.GOOGLE_AI_KEY);
   console.log('API Key length:', process.env.GOOGLE_AI_KEY?.length);
-  console.log('Received topic:', JSON.parse(event.body)?.topic);
+  console.log('API Key first 10 chars:', process.env.GOOGLE_AI_KEY?.substring(0, 10) + '...');
+  
   if (event.httpMethod !== 'POST') {
+    console.log('❌ Wrong HTTP method');
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const { topic, difficulty = 'medium' } = JSON.parse(event.body);
+    console.log('Received topic:', topic);
     
     if (!topic) {
       return {
@@ -20,69 +24,44 @@ exports.handler = async (event) => {
       };
     }
 
-    console.log('Generating AI question for topic:', topic);
+    // Check if we have a valid API key
+    if (!process.env.GOOGLE_AI_KEY || process.env.GOOGLE_AI_KEY.length < 10) {
+      console.log('❌ No valid API key found, using mock data');
+      const mockQuestion = getMockQuestion(topic);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+          success: true, 
+          data: mockQuestion,
+          note: "Using mock data - no valid API key"
+        })
+      };
+    }
 
+    console.log('✅ Attempting real AI generation...');
+    
     // Initialize Google AI with your REAL API key
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `Create exactly one multiple-choice question about "${topic}" at ${difficulty} difficulty level.
+    const prompt = `Create one multiple-choice question about "${topic}". Return ONLY JSON: {"question": "...", "options": ["A","B","C","D"], "correctAnswer": 0, "explanation": "..."}`;
 
-IMPORTANT: Return ONLY valid JSON with this exact structure:
-{
-  "question": "The question text here?",
-  "options": ["Option A text", "Option B text", "Option C text", "Option D text"],
-  "correctAnswer": 0,
-  "explanation": "Brief explanation of why the correct answer is right"
-}
-
-Requirements:
-- Question must be clear and educational
-- 4 options labeled A, B, C, D
-- Only one correct answer (correctAnswer should be 0, 1, 2, or 3)
-- Wrong options should be plausible but incorrect
-- Explanation should be helpful and educational
-- Make the question appropriate for college students`;
-
+    console.log('Sending request to Google AI...');
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+    console.log('✅ AI Raw Response:', text);
 
-    console.log('AI Raw Response:', text);
-
-    // Clean the response (remove markdown code blocks)
     const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
     
     let questionData;
     try {
       questionData = JSON.parse(cleanText);
+      console.log('✅ AI Success - Question:', questionData.question);
     } catch (parseError) {
-      // If JSON parsing fails, try to extract JSON from the response
-      const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        questionData = JSON.parse(jsonMatch[0]);
-      } else {
-        // Fallback: create a basic question
-        questionData = {
-          question: `What is the most important aspect of ${topic}?`,
-          options: [
-            `Fundamental principles of ${topic}`,
-            `Historical background of ${topic}`,
-            `Practical applications of ${topic}`,
-            `Theoretical concepts in ${topic}`
-          ],
-          correctAnswer: 0,
-          explanation: `This question covers key aspects of ${topic}. The fundamental principles are typically the most important for understanding.`
-        };
-      }
+      console.log('❌ JSON parse error, using mock data');
+      questionData = getMockQuestion(topic);
     }
-
-    // Validate the response structure
-    if (!questionData.question || !Array.isArray(questionData.options)) {
-      throw new Error('Invalid question format from AI');
-    }
-
-    console.log('AI Success:', questionData.question);
 
     return {
       statusCode: 200,
@@ -93,13 +72,31 @@ Requirements:
     };
 
   } catch (error) {
-    console.error('AI Generation Error:', error);
+    console.log('❌ AI Generation Error:', error.message);
+    // Fallback to mock data
+    const mockQuestion = getMockQuestion(topic);
     return {
-      statusCode: 500,
+      statusCode: 200,
       body: JSON.stringify({ 
-        error: "Failed to generate question",
-        details: error.message 
+        success: true, 
+        data: mockQuestion,
+        error: error.message 
       })
     };
   }
 };
+
+// Mock data fallback
+function getMockQuestion(topic) {
+  return {
+    question: `What is the fundamental process involved in ${topic}?`,
+    options: [
+      `The core mechanism of ${topic}`,
+      `Historical development of ${topic}`,
+      `Practical applications of ${topic}`,
+      `Theoretical framework of ${topic}`
+    ],
+    correctAnswer: 0,
+    explanation: `Mock data - real AI not available`
+  };
+}
