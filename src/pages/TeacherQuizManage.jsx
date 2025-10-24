@@ -8,6 +8,7 @@ function TeacherQuizManage() {
   const [quiz, setQuiz] = useState(null);
   const [showScores, setShowScores] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false); // Add this state for copy feedback
 
   useEffect(() => {
     loadQuizData();
@@ -63,6 +64,25 @@ function TeacherQuizManage() {
       const updatedQuiz = { ...quiz, students: {} };
       setQuiz(updatedQuiz);
       localStorage.setItem(`quiz_${quizId}`, JSON.stringify(updatedQuiz));
+    }
+  };
+
+  const handleCopyQuizId = async () => {
+    try {
+      await navigator.clipboard.writeText(quiz.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = quiz.id;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -140,7 +160,7 @@ function TeacherQuizManage() {
         zIndex: 1
       }}>
         
-                {/* Quiz Header */}
+        {/* Quiz Header */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -163,7 +183,6 @@ function TeacherQuizManage() {
                 👨‍🏫
               </span>
               <h1 style={{ 
-                //color: theme.colors.text.primary, 
                 margin: 0,
                 background: theme.gradients.primary,
                 backgroundClip: 'text',
@@ -383,7 +402,6 @@ function TeacherQuizManage() {
             gap: theme.spacing.md
           }}>
             <h2 style={{ 
-              //color: theme.colors.text.primary, 
               margin: 0,
               background: theme.gradients.secondary,
               backgroundClip: 'text',
@@ -501,22 +519,75 @@ function TeacherQuizManage() {
           <p style={{ color: theme.colors.text.secondary, marginBottom: theme.spacing.lg, fontSize: '1rem' }}>
             Students can join using this Quiz ID:
           </p>
+          
+          {/* Quiz ID with Copy Button */}
           <div style={{
-            padding: theme.spacing.lg,
-            background: theme.colors.background.secondary,
-            borderRadius: theme.borderRadius.lg,
-            border: `2px dashed ${theme.colors.status.success}40`,
-            fontSize: '1.8rem',
-            fontWeight: 'bold',
-            color: theme.colors.text.primary,
-            marginBottom: theme.spacing.lg,
-            letterSpacing: '1px',
-            fontFamily: 'monospace'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: theme.spacing.md,
+            flexWrap: 'wrap',
+            marginBottom: theme.spacing.lg
           }}>
-            {quiz.id}
+            <div style={{
+              padding: theme.spacing.lg,
+              background: theme.colors.background.secondary,
+              borderRadius: theme.borderRadius.lg,
+              border: `2px dashed ${theme.colors.status.success}40`,
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: theme.colors.text.primary,
+              letterSpacing: '1px',
+              fontFamily: 'monospace',
+              wordBreak: 'break-all',
+              flex: '1',
+              minWidth: '200px',
+              maxWidth: '400px'
+            }}>
+              {quiz.id}
+            </div>
+            
+            {/* Copy Button */}
+            <button
+              onClick={handleCopyQuizId}
+              style={{
+                background: copied ? 
+                  `linear-gradient(135deg, ${theme.colors.status.success}40, ${theme.colors.primary.light}40)` :
+                  `linear-gradient(135deg, ${theme.colors.status.success}20, ${theme.colors.primary.light}20)`,
+                border: `1px solid ${theme.colors.status.success}40`,
+                borderRadius: theme.borderRadius.lg,
+                padding: `${theme.spacing.md} ${theme.spacing.lg}`,
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                color: copied ? theme.colors.status.success : theme.colors.status.success,
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.sm,
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => {
+                if (!copied) {
+                  e.target.style.background = `linear-gradient(135deg, ${theme.colors.status.success}30, ${theme.colors.primary.light}30)`;
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = theme.shadows.md;
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!copied) {
+                  e.target.style.background = `linear-gradient(135deg, ${theme.colors.status.success}20, ${theme.colors.primary.light}20)`;
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
+              }}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy ID'}
+            </button>
           </div>
+          
           <p style={{ color: theme.colors.text.muted, fontSize: '0.9rem', margin: 0 }}>
-            Share this link: <strong style={{ color: theme.colors.primary.light }}>http://localhost:5173/student/join</strong>
+            Share this link: <strong style={{ color: theme.colors.primary.light }}>https://your-vercel-url.vercel.app/student/join</strong>
           </p>
         </div>
       </div>
