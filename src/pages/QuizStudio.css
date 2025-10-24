@@ -1,0 +1,27 @@
+.quiz-studio {
+  min-height: 100vh;
+  position: relative;
+}
+
+.studio-main {
+  position: relative;
+  z-index: 1;
+  padding: 2rem 1rem;
+}
+
+.studio-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.studio-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .studio-main {
+    padding: 1rem 0.5rem;
+  }
+}

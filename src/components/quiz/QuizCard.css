@@ -1,0 +1,91 @@
+.quiz-card {
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.quiz-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.quiz-card-header {
+  margin-bottom: 1rem;
+}
+
+.quiz-title {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.quiz-meta {
+  display: flex;
+  gap: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.quiz-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 80px;
+}
+
+.btn-action.live {
+  background: var(--success);
+  color: white;
+}
+
+.btn-action.live:hover:not(.disabled) {
+  background: #0da271;
+  transform: translateY(-1px);
+}
+
+.btn-action.edit {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.btn-action.edit:hover {
+  background: #059bb4;
+  transform: translateY(-1px);
+}
+
+.btn-action.delete {
+  background: var(--error);
+  color: white;
+}
+
+.btn-action.delete:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.btn-action.disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .quiz-card-actions {
+    flex-direction: column;
+  }
+  
+  .btn-action {
+    min-width: auto;
+  }
+}

@@ -1,0 +1,14 @@
+{
+	"geolocation": {
+		"data": {
+			"country": {
+				"code": "JP",
+				"name": "Japan"
+			},
+			"timezone": "Asia/Tokyo",
+			"latitude": 35.69,
+			"longitude": 139.69
+		},
+		"timestamp": 1761224309372
+	}
+}
