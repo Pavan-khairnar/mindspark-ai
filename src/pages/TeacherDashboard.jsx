@@ -621,7 +621,7 @@ function TeacherDashboard() {
             }}>
               <h3 style={{ 
                 ...professionalTheme.typography.h3, 
-                color: 'var(--color-text-primary)',
+                //color: 'var(--color-text-primary)',
                 marginBottom: professionalTheme.spacing.lg,
                 background: professionalTheme.gradients.primary,
                 backgroundClip: 'text',
@@ -698,7 +698,7 @@ function TeacherDashboard() {
               }}>
                 <h3 style={{ 
                   ...professionalTheme.typography.h3, 
-                  color: 'var(--color-text-primary)',
+                  //color: 'var(--color-text-primary)',
                   background: professionalTheme.gradients.primary,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
@@ -889,7 +889,7 @@ function TeacherDashboard() {
             }}>
               <h3 style={{ 
                 ...professionalTheme.typography.h3, 
-                color: 'var(--color-text-primary)',
+                //color: 'var(--color-text-primary)',
                 marginBottom: professionalTheme.spacing.lg,
                 background: professionalTheme.gradients.secondary,
                 backgroundClip: 'text',
@@ -963,7 +963,7 @@ function TeacherDashboard() {
             }}>
               <h3 style={{ 
                 ...professionalTheme.typography.h3, 
-                color: 'var(--color-text-primary)',
+                //color: 'var(--color-text-primary)',
                 marginBottom: professionalTheme.spacing.lg,
                 background: professionalTheme.gradients.success,
                 backgroundClip: 'text',
@@ -1074,7 +1074,7 @@ function TeacherDashboard() {
               }}>
                 <h3 style={{ 
                   ...professionalTheme.typography.h3,
-                  color: 'var(--color-text-primary)',
+                  //color: 'var(--color-text-primary)',
                   margin: 0,
                   background: professionalTheme.gradients.primary,
                   backgroundClip: 'text',

@@ -363,7 +363,7 @@ function CreateQuiz() {
         <div style={styles.header}>
           <div>
             <h1 style={{ 
-              color: 'var(--color-text-primary)',
+              //color: 'var(--color-text-primary)',
               margin: 0,
               fontSize: '2.5rem',
               fontWeight: '700',

@@ -191,14 +191,15 @@ function StudentJoin() {
               🎓
             </div>
             <h1 style={{
-              ...safeTheme.typography.h2,
-              color: safeTheme.colors.text.primary,
-              marginBottom: safeTheme.spacing.sm,
-              background: safeTheme.gradients.student,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent'
-            }}>
+  ...safeTheme.typography.h2,
+  //color: safeTheme.colors.text.primary,  // ← Remove this line
+  marginBottom: safeTheme.spacing.sm,
+  background: safeTheme.gradients.student,
+  backgroundClip: 'text',
+  WebkitBackgroundClip: 'text',
+  color: 'transparent'  // ← Keep this one
+}}>
+            
               Join Quiz
             </h1>
             <p style={{
@@ -298,7 +299,7 @@ function StudentJoin() {
                 padding: safeTheme.spacing.lg,
                 background: safeTheme.gradients.student,
                 color: 'white',
-                border: 'none',
+                //border: 'none',
                 borderRadius: safeTheme.borderRadius.full,
                 fontSize: '1.1rem',
                 fontWeight: '600',

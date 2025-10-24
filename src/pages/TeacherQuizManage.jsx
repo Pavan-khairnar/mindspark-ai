@@ -163,7 +163,7 @@ function TeacherQuizManage() {
                 👨‍🏫
               </span>
               <h1 style={{ 
-                color: theme.colors.text.primary, 
+                //color: theme.colors.text.primary, 
                 margin: 0,
                 background: theme.gradients.primary,
                 backgroundClip: 'text',
@@ -383,7 +383,7 @@ function TeacherQuizManage() {
             gap: theme.spacing.md
           }}>
             <h2 style={{ 
-              color: theme.colors.text.primary, 
+              //color: theme.colors.text.primary, 
               margin: 0,
               background: theme.gradients.secondary,
               backgroundClip: 'text',

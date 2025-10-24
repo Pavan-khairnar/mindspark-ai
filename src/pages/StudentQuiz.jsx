@@ -367,7 +367,7 @@ function StudentQuiz() {
           }}>
             <div style={{ fontSize: '4rem', marginBottom: professionalTheme.spacing.lg }}>🔍</div>
             <h2 style={{ 
-              color: 'var(--color-error)',
+              //color: 'var(--color-error)',
               marginBottom: professionalTheme.spacing.lg,
               background: 'linear-gradient(135deg, var(--color-error) 0%, #dc2626 100%)',
               backgroundClip: 'text',
@@ -482,7 +482,7 @@ function StudentQuiz() {
             </div>
             
             <h1 style={{ 
-              color: 'var(--color-text-primary)',
+              //color: 'var(--color-text-primary)',
               marginBottom: professionalTheme.spacing.md,
               fontSize: '2.5rem',
               fontWeight: '700',

@@ -63,7 +63,7 @@ function Results() {
             </div>
             <h1 style={{
               ...theme.typography.h2,
-              color: theme.colors.text.primary,
+              //color: theme.colors.text.primary,
               marginBottom: theme.spacing.sm,
               background: theme.gradients.accent,
               backgroundClip: 'text',
